@@ -1,0 +1,21 @@
+# Build
+bin/
+obj/
+
+# VS Code / IDE
+.vscode/
+*.user
+*.suo
+
+# Logs
+*.log
+
+# Environment / Secrets
+appsettings.Demo.json
+
+# Database (ignore only .db files)
+SQLiteDatabase/*.db
+
+# OS
+.DS_Store
+Thumbs.db
