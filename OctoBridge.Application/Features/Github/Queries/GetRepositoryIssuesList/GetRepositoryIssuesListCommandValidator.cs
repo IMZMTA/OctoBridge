@@ -1,5 +1,8 @@
 using FluentValidation;
 using OctoBridge.Domain.Constants;
+using OctoBridge.Domain.Constants.App;
+using OctoBridge.Domain.Constants.External;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Application.CQRS.Abstractions;
 
 namespace OctoBridge.Application.Features.Github.Queries.GetRepositoryIssuesList;
@@ -10,50 +13,51 @@ public class GetRepositoryIssuesListCommandValidator
     public GetRepositoryIssuesListCommandValidator()
     {
         RuleFor(x => x.RepositoryOwner)
+            .NotNull()
             .NotEmpty()
-            .WithMessage(Messages.RepositoryOwnerRequired);
+            .WithMessage(string.Format(ValidationMessages.Required,ErrorFields.RepositoryOwner));
 
         RuleFor(x => x.RepositoryName)
             .NotNull()
             .NotEmpty()
-            .WithMessage(Messages.RepositoryNameRequired);
+            .WithMessage(string.Format(ValidationMessages.Required,ErrorFields.RepositoryName));
 
         RuleFor(x => x.PageSize)
             .NotNull()
-            .GreaterThan(AppConstants.Zero)
+            .GreaterThan(0)
             .LessThanOrEqualTo(GitHubConstants.MaxPageSize)
-            .WithMessage(string.Format(Messages.PageSizeInvalid, GitHubConstants.MaxPageSize));
+            .WithMessage(string.Format(ValidationMessages.PageSizeInvalid, GitHubConstants.MaxPageSize));
 
         RuleFor(x => x.PageNo)
             .NotNull()
-            .GreaterThanOrEqualTo(AppConstants.One)
-            .WithMessage(Messages.PageNumberInvalid);
+            .GreaterThanOrEqualTo(1)
+            .WithMessage(ValidationMessages.PageNumberInvalid);
 
         RuleFor(x => x.Since)
             .LessThanOrEqualTo(DateTime.UtcNow)
             .When(x => x.Since.HasValue)
-            .WithMessage(Messages.SinceInvalid);
+            .WithMessage(ValidationMessages.SinceInvalid);
 
         RuleFor(x => x.Sort)
             .IsInEnum()
-            .WithMessage(Messages.InvalidSort);
+            .WithMessage(ValidationMessages.InvalidSort);
 
         RuleFor(x => x.Direction)
             .IsInEnum()
-            .WithMessage(Messages.InvalidDirection);
+            .WithMessage(ValidationMessages.InvalidDirection);
 
         RuleFor(x => x.State)
             .IsInEnum()
-            .WithMessage(Messages.InvalidIssueState);
+            .WithMessage(ValidationMessages.InvalidIssueState);
 
         RuleFor(x => x.Assignee)
-            .Must(a => string.IsNullOrEmpty(a) || a == "*" || a == "none" || a.Length <= AppConstants.MaxUsernameLength)
-            .WithMessage(Messages.InvalidAssignee);
+            .Must(a => string.IsNullOrEmpty(a) || a == "*" || a == "none" || a.Length <= AppLimits.MaxUsernameLength)
+            .WithMessage(ValidationMessages.InvalidAssignee);
 
         RuleForEach(x => x.Labels)
-            .MaximumLength(AppConstants.MaxLabelNameLength)
+            .MaximumLength(AppLimits.MaxLabelNameLength)
             .When(x => x.Labels != null && x.Labels.Any())
-            .WithMessage(string.Format(Messages.LabelTooLong, AppConstants.MaxLabelNameLength));
+            .WithMessage(string.Format(ValidationMessages.TooLong,ErrorFields.Labels, AppLimits.MaxLabelNameLength));
 
     }
 }

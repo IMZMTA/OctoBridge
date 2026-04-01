@@ -1,7 +1,7 @@
 using OctoBridge.Domain.Enums;
+using OctoBridge.Domain.Common;
 using Microsoft.AspNetCore.Mvc;
 using OctoBridge.Domain.Constants;
-using OctoBridge.Application.Common;
 using OctoBridge.Application.Features.Auth.Queries.Logout;
 using OctoBridge.Application.Features.Auth.Queries.DisconnectGitHub;
 using OctoBridge.Application.Features.Auth.Queries.LoginProviderUrl;

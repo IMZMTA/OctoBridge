@@ -1,5 +1,7 @@
 using FluentValidation;
 using OctoBridge.Domain.Constants;
+using OctoBridge.Domain.Constants.App;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Application.CQRS.Abstractions;
 
 namespace OctoBridge.Application.Features.Github.Command.CreateIssue;
@@ -12,39 +14,38 @@ public class CreateIssueCommandValidator : BaseValidator<CreateIssueRequestDto>
         RuleFor(x => x.RepositoryOwner)
             .NotNull()
             .NotEmpty()
-            .WithMessage(Messages.RepositoryOwnerRequired);
+            .WithMessage(string.Format(ValidationMessages.Required,ErrorFields.RepositoryOwner));
 
         RuleFor(x => x.RepositoryName)
             .NotNull()
             .NotEmpty()
-            .WithMessage(Messages.RepositoryNameRequired);
+            .WithMessage(string.Format(ValidationMessages.Required,ErrorFields.RepositoryName));
 
         RuleFor(x => x.Title)
             .NotNull()
             .NotEmpty()
-            .WithMessage(Messages.IssueTitleRequired)
-            .MaximumLength(AppConstants.MaxIssueTitleLength)
-            .WithMessage(string.Format(Messages.IssueTitleTooLong, AppConstants.MaxIssueTitleLength));
+            .WithMessage(string.Format(ValidationMessages.Required,ErrorFields.Title))
+            .MaximumLength(AppLimits.MaxIssueTitleLength)
+            .WithMessage(string.Format(ValidationMessages.TooLong, ErrorFields.Title, AppLimits.MaxIssueTitleLength));
 
         RuleForEach(x => x.Labels)
             .NotNull()
-            .WithMessage(Messages.LabelNull)
-            .MaximumLength(AppConstants.MaxLabelNameLength)
-            .WithMessage(string.Format(Messages.LabelTooLong, AppConstants.MaxLabelNameLength));
+            .WithMessage(ValidationMessages.Required)
+            .MaximumLength(AppLimits.MaxLabelNameLength)
+            .WithMessage(string.Format(ValidationMessages.TooLong, ErrorFields.Labels, AppLimits.MaxLabelNameLength));
 
         RuleForEach(x => x.Assignees)
             .NotNull()
-            .WithMessage(Messages.AssigneeNull)
-            .MaximumLength(AppConstants.MaxUsernameLength)
-            .WithMessage(string.Format(Messages.AssigneeTooLong, AppConstants.MaxUsernameLength));
+            .WithMessage(ValidationMessages.Required)
+            .MaximumLength(AppLimits.MaxUsernameLength)
+            .WithMessage(string.Format(ValidationMessages.TooLong, ErrorFields.Assignees, AppLimits.MaxUsernameLength));
 
         RuleFor(x => x.Body)
             .NotEmpty()
-            .WithMessage(Messages.IssueBodyNull)
-            .MaximumLength(AppConstants.MaxIssueBodyLength)
+            .WithMessage(ValidationMessages.Required)
+            .MaximumLength(AppLimits.MaxIssueBodyLength)
             .When(x => !string.IsNullOrEmpty(x.Body))
-            .WithMessage(string.Format(Messages.IssueBodyTooLong, AppConstants.MaxIssueBodyLength))
-;
+            .WithMessage(string.Format(ValidationMessages.TooLong, ErrorFields.Body, AppLimits.MaxIssueBodyLength));
 
     }
 }

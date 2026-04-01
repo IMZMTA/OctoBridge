@@ -1,5 +1,5 @@
 using OctoBridge.Domain.Config;
-using OctoBridge.Domain.Constants;
+using OctoBridge.Domain.Constants.Messages;
 
 namespace OctoBridge.Api.Extensions;
 
@@ -7,11 +7,11 @@ public static class CorsExtensions
 {
     public static IServiceCollection AddCustomCors(this IServiceCollection services, IConfiguration configuration)
     {
-        var settings = configuration.GetSection(AppConstants.AppSettings).Get<AppSettings>() ?? throw new InvalidOperationException(Messages.MissingAppSetting);
+        var settings = configuration.GetSection(ConfigurationKeys.AppSettings).Get<AppSettings>() ?? throw new InvalidOperationException(ErrorMessages.MissingAppSettings);
 
         services.AddCors(options =>
         {
-            options.AddPolicy(AppConstants.DefaultCorsPolicy, policy =>
+            options.AddPolicy(ConfigurationKeys.DefaultCorsPolicy, policy =>
             {
                 policy.WithOrigins(settings.AllowedOrigins)
                       .AllowAnyHeader()

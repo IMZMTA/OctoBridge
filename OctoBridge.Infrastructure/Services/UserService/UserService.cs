@@ -24,7 +24,7 @@ public class UserService : IUserService
         var user = await userRepository.RemoveUserAsync(userId, providerId, cancellationToken);
         if (user == null)
         {
-            return AppConstants.Zero;
+            return 0;
         }
         return user.Id;
     }
@@ -91,9 +91,9 @@ public class UserService : IUserService
 
             cache.Set(cacheKey, token, new MemoryCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(AppConstants.CacheExpirationInMinutes),
-                SlidingExpiration = TimeSpan.FromMinutes(AppConstants.CacheSlidingExpirationInMinutes),
-                Size = AppConstants.CacheSize
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(SecurityConstants.CacheExpirationInMinutes),
+                SlidingExpiration = TimeSpan.FromMinutes(SecurityConstants.CacheSlidingExpirationInMinutes),
+                Size = SecurityConstants.CacheSize
             });
 
         }

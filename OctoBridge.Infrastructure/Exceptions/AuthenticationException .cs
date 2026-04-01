@@ -6,7 +6,7 @@ public class AuthenticationException : Exception
 {
     public string Field { get; }
 
-    public AuthenticationException(string message, string field = Messages.General) : base(message)
+    public AuthenticationException(string message, string field = ErrorFields.Authentication) : base(message)
     {
         Field = field;
     }

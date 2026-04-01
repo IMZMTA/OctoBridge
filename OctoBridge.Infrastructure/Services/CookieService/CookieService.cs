@@ -1,5 +1,5 @@
-using OctoBridge.Domain.Constants;
 using Microsoft.AspNetCore.Http;
+using OctoBridge.Domain.Constants;
 
 namespace OctoBridge.Infrastructure.Services.CookieService;
 
@@ -13,7 +13,7 @@ public class CookieService : ICookieService
     }
     public void SetJwtCookie(string token)
     {
-        context.HttpContext?.Response.Cookies.Append(AppConstants.JWTTokenName, token, new CookieOptions
+        context.HttpContext?.Response.Cookies.Append(SecurityConstants.JwtTokenName, token, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
@@ -23,7 +23,7 @@ public class CookieService : ICookieService
     }
     public void ClearJwtCookie()
     {
-        context.HttpContext?.Response.Cookies.Delete(AppConstants.JWTTokenName, new CookieOptions
+        context.HttpContext?.Response.Cookies.Delete(SecurityConstants.JwtTokenName, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,

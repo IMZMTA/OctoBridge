@@ -1,6 +1,6 @@
 using OctoBridge.Domain.Models;
-using OctoBridge.Domain.Constants;
-using OctoBridge.Application.Common;
+using OctoBridge.Domain.Common;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Application.CQRS.Abstractions;
 using OctoBridge.Infrastructure.Services.OAuthService;
 using OctoBridge.Infrastructure.Services.TokenService;
@@ -32,7 +32,7 @@ public class HandleOAuthCallbackHandler : BaseHandler<HandleOAuthCallbackRequest
             return new ApiResponse<HandleOAuthCallbackResponseDto>
             {
                 Success = false,
-                Messages = new List<string> { string.Format(Messages.OAuthProviderNotSupported, request.Provider) }
+                Messages = new List<string> { string.Format(ValidationMessages.ProviderNotSupported, request.Provider) }
             };
         }
 
@@ -40,10 +40,10 @@ public class HandleOAuthCallbackHandler : BaseHandler<HandleOAuthCallbackRequest
 
         var user = new UserModel
         {
-            UserId = tokenModel.UserId ?? AppConstants.Zero,
+            UserId = tokenModel.UserId ?? 0,
             UserName = tokenModel.UserName ?? string.Empty,
             Email = tokenModel.Email ?? string.Empty,
-            ProviderId = tokenModel.ProviderId ?? AppConstants.Zero
+            ProviderId = tokenModel.ProviderId ?? 0
         };
 
         var jwt = tokenService.GenerateAccessToken(user);
@@ -53,7 +53,7 @@ public class HandleOAuthCallbackHandler : BaseHandler<HandleOAuthCallbackRequest
         return new ApiResponse<HandleOAuthCallbackResponseDto>()
         {
             Success = true,
-            Messages = new List<string> { Messages.OAuthLoginSuccess },
+            Messages = new List<string> { SuccessMessages.OAuthLoginSuccess },
             Data = new HandleOAuthCallbackResponseDto()
             {
                 UserId = tokenModel.UserId,

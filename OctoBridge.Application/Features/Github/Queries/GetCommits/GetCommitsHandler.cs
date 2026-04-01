@@ -1,5 +1,5 @@
-using OctoBridge.Domain.Constants;
-using OctoBridge.Application.Common;
+using OctoBridge.Domain.Common;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Domain.Models.OctoBridgeApp;
 using OctoBridge.Application.CQRS.Abstractions;
 using OctoBridge.Infrastructure.Services.UserContext;
@@ -34,7 +34,7 @@ public class GetCommitsHandler : BaseHandler<GetCommitsRequestDto, GetCommitsRes
             return new ApiResponse<GetCommitsResponseDto>
             {
                 Success = false,
-                Messages = new() { Messages.UserOrSessionExpired }
+                Messages = new() { ErrorMessages.UserOrSessionExpired }
             };
         }
 
@@ -56,7 +56,7 @@ public class GetCommitsHandler : BaseHandler<GetCommitsRequestDto, GetCommitsRes
         return new ApiResponse<GetCommitsResponseDto>()
         {
             Success = true,
-            Messages = new List<string> { Messages.CommitsFetchedSuccess },
+            Messages = new List<string> { SuccessMessages.CommitsFetched },
             Data = new GetCommitsResponseDto()
             {
                 UserId = userId,

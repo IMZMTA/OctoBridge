@@ -1,5 +1,5 @@
-using OctoBridge.Domain.Constants;
-using OctoBridge.Application.Common;
+using OctoBridge.Domain.Common;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Application.CQRS.Abstractions;
 using OctoBridge.Infrastructure.Services.OAuthService;
 
@@ -25,7 +25,7 @@ public class LoginProviderUrlHandler : BaseHandler<LoginProviderUrlRequestDto, L
             return new ApiResponse<LoginProviderUrlResponseDto>
             {
                 Success = false,
-                Messages = new List<string> { string.Format(Messages.ProviderNotSupported, request.Provider)  }
+                Messages = new List<string> { string.Format(ValidationMessages.ProviderNotSupported, request.Provider)  }
             };
         }
 
@@ -34,7 +34,7 @@ public class LoginProviderUrlHandler : BaseHandler<LoginProviderUrlRequestDto, L
         return new ApiResponse<LoginProviderUrlResponseDto>()
         {
             Success = true,
-            Messages = new List<string> { string.Format(Messages.RedirectUrlGenerated, request.Provider) },
+            Messages = new List<string> { string.Format(SuccessMessages.RedirectUrlGenerated, request.Provider) },
             Data = new LoginProviderUrlResponseDto()
             {
                 RedirectUrl = redirectUrl,

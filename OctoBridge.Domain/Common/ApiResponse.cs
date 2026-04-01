@@ -1,4 +1,4 @@
-namespace OctoBridge.Application.Common;
+namespace OctoBridge.Domain.Common;
 
 public class ApiResponse<T>
 {
@@ -14,8 +14,9 @@ public class ApiResponse<T>
     public ApiResponse(bool success, List<string> message, T data, List<ApiError> errors)
     {
         Success = success;
-        Messages = message;
+        Messages = message ?? new List<string>();
         Data = data;
         Errors = errors ?? new List<ApiError>();
+    
     }
 }

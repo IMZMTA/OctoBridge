@@ -1,10 +1,10 @@
-using Microsoft.Extensions.Options;
 using OctoBridge.Domain.Config;
+using OctoBridge.Domain.Common;
+using Microsoft.Extensions.Options;
 using System.Security.Authentication;
-using OctoBridge.Application.Common;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Application.CQRS.Abstractions;
 using OctoBridge.Infrastructure.Services.GitHubService;
-using OctoBridge.Domain.Constants;
 
 namespace OctoBridge.Application.Features.PAT.Queries.ConnectGitHubByServerPAT;
 
@@ -32,7 +32,7 @@ public class ConnectGitHubByServerPATHandler : BaseHandler<ConnectGitHubByServer
         return new ApiResponse<ConnectGitHubByServerPATResponseDto>()
         {
             Success = true,
-            Messages = new List<string> { Messages.PATLoginSuccess },
+            Messages = new List<string> { SuccessMessages.PATLoginSuccess },
             Data = new ConnectGitHubByServerPATResponseDto()
             {
                 ProviderId = result.ProviderId,
