@@ -25,7 +25,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
     {
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlite(config.GetConnectionString(AppConstants.DefaultConnection)));
+            options.UseSqlite(config.GetConnectionString(ConfigurationKeys.DefaultConnection)));
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
@@ -54,7 +54,7 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         services.AddMemoryCache(options =>
         {
-            options.SizeLimit = AppConstants.CacheSizeLimit;
+            options.SizeLimit = SecurityConstants.CacheSizeLimit;
         });
 
         services.AddScoped<IUserContext, UserContext>();

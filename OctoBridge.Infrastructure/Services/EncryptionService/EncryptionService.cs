@@ -1,7 +1,7 @@
 using System.Text;
+using OctoBridge.Domain.Config;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
-using OctoBridge.Domain.Config;
 
 namespace OctoBridge.Infrastructure.Services.Security;
 

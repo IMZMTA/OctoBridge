@@ -1,5 +1,5 @@
-using OctoBridge.Domain.Constants;
-using OctoBridge.Application.Common;
+using OctoBridge.Domain.Common;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Domain.Models.OctoBridgeApp;
 using OctoBridge.Application.CQRS.Abstractions;
 using OctoBridge.Infrastructure.Services.UserContext;
@@ -34,7 +34,7 @@ public class CreatePullRequestHandler : BaseHandler<CreatePullRequestRequestDto,
             return new ApiResponse<CreatePullRequestResponseDto>
             {
                 Success = false,
-                Messages = new() { Messages.UserOrSessionExpired }
+                Messages = new() { ErrorMessages.UserOrSessionExpired }
             };
         }
 
@@ -57,7 +57,7 @@ public class CreatePullRequestHandler : BaseHandler<CreatePullRequestRequestDto,
         return new ApiResponse<CreatePullRequestResponseDto>()
         {
             Success = true,
-            Messages = new List<string> { Messages.PRCreatedSuccessfully },
+            Messages = new List<string> { SuccessMessages.PRCreated },
             Data = new CreatePullRequestResponseDto()
             {
                 GlobalId = prResponse.Id,

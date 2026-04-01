@@ -1,11 +1,15 @@
+using System.Text.Json;
 using System.Net.Http.Json;
 using System.Net.Http.Headers;
 using OctoBridge.Domain.Config;
-using OctoBridge.Domain.Constants;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using OctoBridge.Domain.Models.GitHub;
+using OctoBridge.Domain.Common.Helpers;
+using OctoBridge.Infrastructure.Exceptions;
+using OctoBridge.Domain.Constants.External;
 using OctoBridge.Domain.Models.OctoBridgeApp;
+using OctoBridge.Domain.Constants.Messages;
 
 namespace OctoBridge.Infrastructure.Clients.OAuthClient;
 
@@ -24,28 +28,33 @@ public class GitHubOAuthClient : IGitHubOAuthClient
 
     private async Task<T> SendAsync<T>( HttpMethod method, string url, HttpContent content, CancellationToken cancellationToken)
     {
-        var request = new HttpRequestMessage(method, url)
+        using var request = new HttpRequestMessage(method, url)
         {
             Content = content
         };
 
         request.Headers.Accept.Add(
-            new MediaTypeWithQualityHeaderValue(GitHubConstants.GitHubApplicationJson));
+            new MediaTypeWithQualityHeaderValue(GitHubConstants.MediaType));
 
         logger.LogInformation("GitHub OAuth → {Method} {Url}", method, url);
 
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await httpClient.SendAsync(request, cancellationToken);
+
+        var json = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
-            var error = await response.Content.ReadAsStringAsync(cancellationToken);
+            var error = JsonSerializer.Deserialize<GitHubOAuthError>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                        ?? new GitHubOAuthError { ErrorDescription = json };
+            
+            var mappedErrors = GitHubErrorMapper.MapOAuthError(error);
 
-            logger.LogError("OAuth Error: {Status} {Error}",
-                response.StatusCode, error);
+            logger.LogError("GitHub OAuth Error | Status: {StatusCode} | Message: {Message} | Details: {@Errors} | ErrorUri: {Uri}",
+                response.StatusCode, error.ErrorDescription, error.Error, error.ErrorUri);
 
-            throw new HttpRequestException(
-                $"GitHub OAuth Error: {response.StatusCode} - {error}",
-                null,
+            throw new ExternalApiException(
+                ErrorMessages.OAuthErrorOccurred,
+                mappedErrors,
                 response.StatusCode);
         }
 
@@ -68,7 +77,7 @@ public class GitHubOAuthClient : IGitHubOAuthClient
             { "redirect_uri", request.RedirectUri }
         };
 
-        var content = new FormUrlEncodedContent(formData);
+        using var content = new FormUrlEncodedContent(formData);
 
         var response = await SendAsync<GitHubTokenModel>(HttpMethod.Post, tokenEndpoint.ToString(), content, cancellationToken);
 

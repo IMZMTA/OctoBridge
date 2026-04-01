@@ -56,8 +56,8 @@ public class TokenService : ITokenService
 
     public string? ExtractTokenFromHeader(HttpContext context)
     {
-        var authHeader = context.Request.Headers[AppConstants.Authorization].ToString();
-        return authHeader.StartsWith(AppConstants.Bearer) ? authHeader.Substring(AppConstants.Bearer.Length).Trim() : null;
+        var authHeader = context.Request.Headers[SecurityConstants.AuthorizationHeader].ToString();
+        return authHeader.StartsWith(SecurityConstants.Bearer) ? authHeader.Substring(SecurityConstants.Bearer.Length).Trim() : null;
     }
 
     public string? ExtractRefreshTokenFromCookie(HttpContext context) =>

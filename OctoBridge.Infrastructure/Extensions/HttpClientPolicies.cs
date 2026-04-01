@@ -12,8 +12,8 @@ public static class HttpClientPolicies
         return HttpPolicyExtensions
             .HandleTransientHttpError()
             .WaitAndRetryAsync(
-                AppConstants.MaxRetryAttempts,
-                retry => TimeSpan.FromSeconds(Math.Pow(AppConstants.RetryDelayInSecond, retry)),
+                ResilienceConstants.MaxRetryAttempts,
+                retry => TimeSpan.FromSeconds(Math.Pow(ResilienceConstants.RetryDelaySeconds, retry)),
                 (result, timeSpan, retryCount, context) =>
                 {
                     Console.WriteLine($"Retry {retryCount} after {timeSpan}");
@@ -27,7 +27,7 @@ public static class HttpClientPolicies
             .HandleResult<HttpResponseMessage>(r =>
                 r.StatusCode == HttpStatusCode.TooManyRequests ||
                 r.StatusCode == HttpStatusCode.ServiceUnavailable)
-            .WaitAndRetryAsync(AppConstants.MaxRateLimit, _ => TimeSpan.FromSeconds(AppConstants.RateLimitIntervalInSeconds));
+            .WaitAndRetryAsync(ResilienceConstants.MaxRateLimit, _ => TimeSpan.FromSeconds(ResilienceConstants.RateLimitIntervalSeconds));
     }
 }
 

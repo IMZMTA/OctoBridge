@@ -1,6 +1,5 @@
 using MediatR;
-using OctoBridge.Domain.Constants;
-using OctoBridge.Application.Common;
+using OctoBridge.Domain.Common;
 
 namespace OctoBridge.Application.CQRS.Abstractions;
 
@@ -12,23 +11,7 @@ public abstract class BaseHandler<TRequest, TResponse> : IRequestHandler<TReques
 
     public async Task<ApiResponse<TResponse>> Handle(TRequest request, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            return await ProcessAsync(request, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            return new ApiResponse<TResponse>()
-            {
-                Success = false,
-                Messages = new List<string> { Messages.UnexpectedError },
-                Data = default,
-                Errors = new List<ApiError>
-                {
-                    new ApiError { Field = Messages.General, Message = ex.Message }
-                }
-            };
-        }
+        return await ProcessAsync(request, cancellationToken);
     }
 
     /// <summary>

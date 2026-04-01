@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using OctoBridge.Domain.Constants;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Infrastructure.Exceptions;
 
 namespace OctoBridge.Infrastructure.Services.UserContext;
@@ -21,7 +22,7 @@ public class UserContext : IUserContext
 
             if (user?.Identity?.IsAuthenticated != true)
             {
-                throw new AuthenticationException(Messages.UserOrSessionExpired, AppConstants.Session);
+                throw new AuthenticationException(ErrorMessages.UserOrSessionExpired, ErrorFields.Authentication);
             }
             return user ?? throw new UnauthorizedAccessException("No HttpContext");
         }

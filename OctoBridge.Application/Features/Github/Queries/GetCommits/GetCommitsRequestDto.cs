@@ -1,6 +1,6 @@
 using MediatR;
-using OctoBridge.Domain.Constants;
-using OctoBridge.Application.Common;
+using OctoBridge.Domain.Common;
+using OctoBridge.Domain.Constants.External;
 
 namespace OctoBridge.Application.Features.Github.Queries.GetCommits;
 

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using OctoBridge.Domain.Common;
 using OctoBridge.Domain.Constants;
-using OctoBridge.Application.Common;
 using OctoBridge.Application.Features.PAT.Queries.ConnectGitHubByUsersPAT;
 using OctoBridge.Application.Features.PAT.Queries.ConnectGitHubByServerPAT;
 

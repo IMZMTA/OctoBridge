@@ -1,11 +1,11 @@
 using OctoBridge.Domain.Enums;
-using OctoBridge.Application.Common;
+using OctoBridge.Domain.Common;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Domain.Models.OctoBridgeApp;
 using OctoBridge.Application.CQRS.Abstractions;
 using OctoBridge.Infrastructure.Services.UserContext;
 using OctoBridge.Infrastructure.Services.UserService;
 using OctoBridge.Infrastructure.Services.GitHubService;
-using OctoBridge.Domain.Constants;
 
 namespace OctoBridge.Application.Features.Github.Queries.GetRepositories;
 
@@ -35,7 +35,7 @@ public class GetRepositoriesHandler : BaseHandler<GetRepositoriesRequestDto, Get
             return new ApiResponse<GetRepositoriesResponseDto>
             {
                 Success = false,
-                Messages = new() { Messages.UserOrSessionExpired }
+                Messages = new() { ErrorMessages.UserOrSessionExpired }
             };
         }
 
@@ -68,7 +68,7 @@ public class GetRepositoriesHandler : BaseHandler<GetRepositoriesRequestDto, Get
         return new ApiResponse<GetRepositoriesResponseDto>()
         {
             Success = true,
-            Messages = new List<string> { Messages.RepositoriesFetchedSuccess },
+            Messages = new List<string> { SuccessMessages.RepositoriesFetched },
             Data = new GetRepositoriesResponseDto()
             {
                 UserId = user.UserId,

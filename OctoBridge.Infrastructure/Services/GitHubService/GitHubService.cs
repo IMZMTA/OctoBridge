@@ -1,7 +1,7 @@
 using System.Web;
 using OctoBridge.Domain.Enums;
-using OctoBridge.Domain.Constants;
 using System.Text.RegularExpressions;
+using OctoBridge.Domain.Constants.External;
 using OctoBridge.Domain.Models.OctoBridgeApp;
 using OctoBridge.Infrastructure.Clients.GitHubClient;
 
@@ -105,7 +105,7 @@ public class GitHubService : IGitHubService
             ActiveLockReason = rawIssue.ActiveLockReason,
             CreatedAt = rawIssue.CreatedAt,
             UpdatedAt = rawIssue.UpdatedAt,
-            Comments = rawIssue.Comments ?? AppConstants.Zero
+            Comments = rawIssue.Comments ?? 0
         };
     }
 
@@ -135,7 +135,7 @@ public class GitHubService : IGitHubService
             ActiveLockReason = issue.ActiveLockReason,
             CreatedAt = issue.CreatedAt,
             UpdatedAt = issue.UpdatedAt,
-            Comments = issue.Comments ?? AppConstants.Zero
+            Comments = issue.Comments ?? 0
         }).ToList();
 
         return new PaginatedResponseModel<IssueResponseModel>
@@ -227,9 +227,9 @@ public class GitHubService : IGitHubService
 
             if (hasAffiliation)
             {
-                var affs = request.Affiliations!.Select(a =>
+                var affiliation = request.Affiliations!.Select(a =>
                     a.ToString().ToLower() == "organizationmember" ? "organization_member" : a.ToString().ToLower());
-                query["affiliation"] = string.Join(",", affs);
+                query["affiliation"] = string.Join(",", affiliation);
             }
 
             if (!hasVisibility && !hasAffiliation && request.Type.HasValue)
@@ -247,7 +247,7 @@ public class GitHubService : IGitHubService
 
     private static int GetLastPage(string? linkHeader)
     {
-        if (string.IsNullOrEmpty(linkHeader)) return AppConstants.Zero;
+        if (string.IsNullOrEmpty(linkHeader)) return 0;
 
         var match = Regex.Match(linkHeader, @"page=(\d+)>; rel=""last""");
         if (match.Success && int.TryParse(match.Groups[1].Value, out var lastPage))
@@ -255,7 +255,7 @@ public class GitHubService : IGitHubService
             return lastPage;
         }
 
-        return AppConstants.Zero;
+        return 0;
     }
 
     private static bool HasNextPage(string? linkHeader)
@@ -278,7 +278,7 @@ public class GitHubService : IGitHubService
         query["per_page"] = request.PageSize.ToString();
         query["page"] = request.PageNo.ToString();
 
-        if (request.Labels != null && request.Labels.Count != AppConstants.Zero)
+        if (request.Labels != null && request.Labels.Count != 0)
         {
             query["labels"] = string.Join(",", request.Labels);
         }

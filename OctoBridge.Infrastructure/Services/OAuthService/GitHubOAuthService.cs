@@ -81,7 +81,7 @@ public class GitHubOAuthService : IOAuthService
             ProviderId = savedUser.ProviderId,
             UserName = savedUser.UserName,
             Email = savedUser.Email,
-            TokenType = AppConstants.Bearer,
+            TokenType = SecurityConstants.Bearer,
             IssuedAt = DateTime.UtcNow,
             ExpiresAt = DateTime.UtcNow.AddHours(2)
         };

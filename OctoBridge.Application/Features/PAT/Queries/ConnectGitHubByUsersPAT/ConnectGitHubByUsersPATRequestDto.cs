@@ -1,6 +1,6 @@
 using MediatR;
-using OctoBridge.Domain.Constants;
-using OctoBridge.Application.Common;
+using OctoBridge.Domain.Common;
+using OctoBridge.Domain.Constants.Messages;
 
 namespace OctoBridge.Application.Features.PAT.Queries.ConnectGitHubByUsersPAT;
 
@@ -9,6 +9,6 @@ public class ConnectGitHubByUsersPATRequestDto : IRequest<ApiResponse<ConnectGit
     public string PersonalAccessToken { get; set; } = string.Empty;
     public override string ToString()
     {
-        return $"ConnectGitHubRequest: Connector={AppConstants.ConnectorName}, PAT=********";
+        return $"ConnectGitHubRequest: Connector={Messages.ConnectorName}, PAT=********";
     }
 }

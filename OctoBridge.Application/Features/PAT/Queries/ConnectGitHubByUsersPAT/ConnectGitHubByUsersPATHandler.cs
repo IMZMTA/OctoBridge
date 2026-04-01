@@ -1,7 +1,8 @@
 using OctoBridge.Domain.Constants;
-using OctoBridge.Application.Common;
+using OctoBridge.Domain.Common;
 using OctoBridge.Application.CQRS.Abstractions;
 using OctoBridge.Infrastructure.Services.GitHubService;
+using OctoBridge.Domain.Constants.Messages;
 
 namespace OctoBridge.Application.Features.PAT.Queries.ConnectGitHubByUsersPAT;
 
@@ -22,7 +23,7 @@ public class ConnectGitHubByUsersPATHandler : BaseHandler<ConnectGitHubByUsersPA
         return new ApiResponse<ConnectGitHubByUsersPATResponseDto>()
         {
             Success = true,
-            Messages = new List<string> { Messages.PATLoginSuccess },
+            Messages = new List<string> { SuccessMessages.PATLoginSuccess },
             Data = new ConnectGitHubByUsersPATResponseDto()
             {
                 ProviderId = result.ProviderId,
