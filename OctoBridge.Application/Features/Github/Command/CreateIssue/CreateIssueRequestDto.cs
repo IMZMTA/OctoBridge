@@ -1,5 +1,5 @@
 using MediatR;
-using OctoBridge.Application.Common;
+using OctoBridge.Domain.Common;
 
 namespace OctoBridge.Application.Features.Github.Command.CreateIssue;
 

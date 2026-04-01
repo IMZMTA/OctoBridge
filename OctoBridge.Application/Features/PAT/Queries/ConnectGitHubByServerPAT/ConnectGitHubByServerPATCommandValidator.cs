@@ -1,6 +1,7 @@
 using FluentValidation;
+using OctoBridge.Domain.Constants.App;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Application.CQRS.Abstractions;
-using OctoBridge.Domain.Constants;
 
 namespace OctoBridge.Application.Features.PAT.Queries.ConnectGitHubByServerPAT;
 
@@ -9,7 +10,7 @@ public class ConnectGitHubByServerPATCommandValidator : BaseValidator<ConnectGit
     public ConnectGitHubByServerPATCommandValidator()
     {
         RuleFor(x => x.ConnectorName)
-            .MaximumLength(AppConstants.MaxLabelNameLength)
-            .WithMessage(Messages.ConnectorNameTooLong);
+            .MaximumLength(AppLimits.MaxLabelNameLength)
+            .WithMessage(string.Format(ValidationMessages.ConnectorNameTooLong, AppLimits.MaxLabelNameLength));
     }
 }

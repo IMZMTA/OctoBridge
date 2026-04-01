@@ -1,6 +1,7 @@
 using NSwag;
 using OctoBridge.Api.Descriptor;
 using OctoBridge.Domain.Constants;
+using OctoBridge.Domain.Constants.App;
 using NSwag.Generation.Processors.Security;
 
 namespace OctoBridge.Api.Extensions;
@@ -11,8 +12,8 @@ public static class SwaggerExtensions
     {
         services.AddOpenApiDocument(config =>
         {
-            config.Title = AppConstants.AppName;
-            config.Version = AppConstants.Version;
+            config.Title = AppInfo.Name;
+            config.Version = AppInfo.Version;
 
             config.Description = @"### OctoBridge - GitHub Connector API
 
@@ -32,18 +33,18 @@ public static class SwaggerExtensions
 
             config.SchemaSettings.SchemaProcessors.Add(new EnumDescriptionSchemaProcessor());
 
-            config.AddSecurity(AppConstants.JWT, new OpenApiSecurityScheme
+            config.AddSecurity(SecurityConstants.Jwt, new OpenApiSecurityScheme
             {
                 Type = OpenApiSecuritySchemeType.Http,
-                Scheme = AppConstants.Bearer.ToLower(),
-                Name = AppConstants.Authorization,
-                BearerFormat = AppConstants.JWT,
+                Scheme = SecurityConstants.Bearer.ToLower(),
+                Name = SecurityConstants.AuthorizationHeader,
+                BearerFormat = SecurityConstants.Jwt,
                 In = OpenApiSecurityApiKeyLocation.Header,
-                Description = Messages.JWTDescription
+                Description = SecurityConstants.JWTDescription
             });
 
             config.OperationProcessors.Add(
-                new AspNetCoreOperationSecurityScopeProcessor(AppConstants.JWT));
+                new AspNetCoreOperationSecurityScopeProcessor(SecurityConstants.Jwt));
         });
 
         return services;

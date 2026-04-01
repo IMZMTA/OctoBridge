@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using OctoBridge.Domain.Common;
 using OctoBridge.Domain.Constants;
-using OctoBridge.Application.Common;
 using OctoBridge.Application.Features.Github.Queries.GetCommits;
 using OctoBridge.Application.Features.Github.Command.CreateIssue;
 using OctoBridge.Application.Features.Github.Queries.GetRepositories;

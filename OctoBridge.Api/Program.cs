@@ -2,7 +2,7 @@ using OctoBridge.Domain.Config;
 using OctoBridge.Api.Extensions;
 using OctoBridge.Api.Middleware;
 using System.Text.Json.Serialization;
-using OctoBridge.Domain.Constants;
+using OctoBridge.Domain.Constants.Messages;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -14,7 +14,7 @@ builder.Services.AddProjectServices(config);
 builder.Services.AddCustomCors(config);
 builder.Services.AddJwtAuthentication(config);
 
-var appSettings = config.GetSection(AppConstants.AppSettings).Get<AppSettings>() ?? throw new InvalidOperationException(Messages.MissingAppSetting);
+var appSettings = config.GetSection(ConfigurationKeys.AppSettings).Get<AppSettings>() ?? throw new InvalidOperationException(ErrorMessages.MissingAppSettings);
 
 if (appSettings.SwaggerEnabled)
 {
@@ -32,7 +32,7 @@ if (appSettings.SwaggerEnabled)
 }
 
 app.UseHttpsRedirection();
-app.UseCors(AppConstants.DefaultCorsPolicy);
+app.UseCors(ConfigurationKeys.DefaultCorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

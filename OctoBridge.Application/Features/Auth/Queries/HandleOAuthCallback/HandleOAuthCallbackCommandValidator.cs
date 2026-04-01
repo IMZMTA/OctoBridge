@@ -1,6 +1,6 @@
 using FluentValidation;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Application.CQRS.Abstractions;
-using OctoBridge.Domain.Constants;
 
 namespace OctoBridge.Application.Features.Auth.Queries.HandleOAuthCallback;
 
@@ -10,6 +10,6 @@ public class HandleOAuthCallbackCommandValidator : BaseValidator<HandleOAuthCall
     {
         RuleFor(x => x.Provider)
             .IsInEnum()
-            .WithMessage(Messages.InvalidProvider);
+            .WithMessage(ValidationMessages.InvalidProvider);
     }
 }

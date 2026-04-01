@@ -1,5 +1,5 @@
 using FluentValidation;
-using OctoBridge.Domain.Constants;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Application.CQRS.Abstractions;
 
 namespace OctoBridge.Application.Features.Auth.Queries.LoginProviderUrl;
@@ -10,6 +10,6 @@ public class LoginProviderUrlCommandValidator : BaseValidator<LoginProviderUrlRe
     {
         RuleFor(x => x.Provider)
             .IsInEnum()
-            .WithMessage(Messages.InvalidProvider);
+            .WithMessage(ValidationMessages.InvalidProvider);
     }
 }

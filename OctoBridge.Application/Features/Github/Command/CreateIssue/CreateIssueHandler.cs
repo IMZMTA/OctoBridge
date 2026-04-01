@@ -1,10 +1,10 @@
-using OctoBridge.Application.Common;
+using OctoBridge.Domain.Common;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Domain.Models.OctoBridgeApp;
 using OctoBridge.Application.CQRS.Abstractions;
 using OctoBridge.Infrastructure.Services.UserContext;
 using OctoBridge.Infrastructure.Services.UserService;
 using OctoBridge.Infrastructure.Services.GitHubService;
-using OctoBridge.Domain.Constants;
 
 namespace OctoBridge.Application.Features.Github.Command.CreateIssue;
 
@@ -34,7 +34,7 @@ public class CreateIssueHandler : BaseHandler<CreateIssueRequestDto, CreateIssue
             return new ApiResponse<CreateIssueResponseDto>
             {
                 Success = false,
-                Messages = new() { Messages.UserOrSessionExpired }
+                Messages = new() { ErrorMessages.UserOrSessionExpired }
             };
         }
 
@@ -54,7 +54,7 @@ public class CreateIssueHandler : BaseHandler<CreateIssueRequestDto, CreateIssue
         return new ApiResponse<CreateIssueResponseDto>()
         {
             Success = true,
-            Messages = new List<string> { Messages.IssueCreatedSuccessfully },
+            Messages = new List<string> { SuccessMessages.IssueCreatedSuccessfully },
             Data = new CreateIssueResponseDto()
             {
                 GlobalId = issueResponse.GlobalId,

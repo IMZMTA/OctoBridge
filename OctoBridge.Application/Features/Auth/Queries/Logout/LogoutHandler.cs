@@ -1,6 +1,6 @@
-using OctoBridge.Application.Common;
+using OctoBridge.Domain.Common;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Application.CQRS.Abstractions;
-using OctoBridge.Domain.Constants;
 using OctoBridge.Infrastructure.Services.CookieService;
 
 namespace OctoBridge.Application.Features.Auth.Queries.Logout;
@@ -20,7 +20,7 @@ public class LogoutHandler : BaseHandler<LogoutRequestDto, LogoutResponseDto>
         return new ApiResponse<LogoutResponseDto>()
         {
             Success = true,
-            Messages = new List<string> { Messages.LogoutSuccessfully },
+            Messages = new List<string> { SuccessMessages.LogoutSuccess },
             Data = null,
         };
     }

@@ -1,13 +1,19 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using System.Net.Http.Json;
 using System.Net.Http.Headers;
 using OctoBridge.Domain.Config;
-using OctoBridge.Domain.Constants;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using OctoBridge.Domain.Models.GitHub;
+using OctoBridge.Domain.Common.Helpers;
+using OctoBridge.Infrastructure.Exceptions;
+using OctoBridge.Domain.Constants.External;
 using OctoBridge.Domain.Models.OctoBridgeApp;
+using Microsoft.AspNetCore.Components.Forms;
+using OctoBridge.Domain.Constants.Messages;
+using OctoBridge.Domain.Constants;
 
 namespace OctoBridge.Infrastructure.Clients.GitHubClient;
 public class GitHubClient : IGitHubClient
@@ -23,16 +29,17 @@ public class GitHubClient : IGitHubClient
         oauthSettings = options.Value.Providers.GitHub.OAuth;
     }
 
-    private async Task<HttpResponseMessage> SendAsync(HttpMethod method, String url, string accessToken, CancellationToken cancellationToken, object? bodyContent = null, bool includeAcceptHeader = true)
+    private async Task<GitHubApiResponse<T>> SendAsync<T>(HttpMethod method, String url, string accessToken, CancellationToken cancellationToken, object? bodyContent = null, bool includeAcceptHeader = true)
     {
-        var request = new HttpRequestMessage(method, url);
         
         if (string.IsNullOrWhiteSpace(accessToken)){
             logger.LogError("Access token is null or empty.");
-            throw new ArgumentException(Messages.AccessTokenEmpty, nameof(accessToken));
+            throw new ArgumentException(ErrorMessages.AccessTokenEmpty, nameof(accessToken));
         }
 
-        request.Headers.Authorization = new AuthenticationHeaderValue(AppConstants.Bearer, accessToken);
+        using var request = new HttpRequestMessage(method, url);
+
+        request.Headers.Authorization = new AuthenticationHeaderValue(SecurityConstants.Bearer, accessToken);
 
         if (bodyContent != null)
         {
@@ -41,24 +48,40 @@ public class GitHubClient : IGitHubClient
 
         if (includeAcceptHeader)
         {
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(GitHubConstants.GitHubApplicationJson));
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(GitHubConstants.MediaType));
         }
 
         logger.LogInformation("GitHub API → {Method} {Url}", method, url);
 
-        var response = await httpClient.SendAsync(request, cancellationToken);
+        using var response = await httpClient.SendAsync(request, cancellationToken);
         LogRateLimit(response);
+
+        var json = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
-            var error = await response.Content.ReadAsStringAsync(cancellationToken);
+            var error = JsonSerializer.Deserialize<GitHubApiError>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                        ?? new GitHubApiError { Message = json };
 
-            logger.LogError("GitHub API Error: {StatusCode}, {Error}", response.StatusCode, error);
+            var mappedErrors = GitHubErrorMapper.MapToApiErrors(error);
 
-            throw new HttpRequestException($"GitHub API Error: {response.StatusCode} - {error}", null, response.StatusCode);
+            logger.LogError("GitHub API Error | Status: {StatusCode} | Message: {Message} | Details: {@Errors} | DocumentationUrl: {Url}",
+                response.StatusCode, error.Message, error.Errors, error.DocumentationUrl);
+            throw new ExternalApiException(
+                error.Message,
+                mappedErrors,
+                response.StatusCode);
         }
 
-        return response;
+        var data = JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        var apiResponse = new GitHubApiResponse<T>
+        {
+            Data = data,
+            LinkHeader = ExtractLinkHeader(response)
+        };
+
+        return apiResponse;
     }
 
     private void LogRateLimit(HttpResponseMessage response)
@@ -72,31 +95,27 @@ public class GitHubClient : IGitHubClient
 
     private static string? ExtractLinkHeader(HttpResponseMessage response)
     {
-        response.Headers.TryGetValues(GitHubConstants.Link, out var values);
+        response.Headers.TryGetValues(GitHubConstants.LinkHeader, out var values);
         return values?.FirstOrDefault();
     }
 
     public async Task<GitHubUserModel> GetUserAsync(string accessToken, CancellationToken cancellationToken)
     {
 
-        var response = await SendAsync(HttpMethod.Get, GitHubEndpoints.UserProfile, accessToken, cancellationToken);
+        var response = await SendAsync<GitHubUserModel>(HttpMethod.Get, GitHubEndpoints.UserProfile, accessToken, cancellationToken);
 
-        return await response.Content.ReadFromJsonAsync<GitHubUserModel>(cancellationToken: cancellationToken)
-               ?? throw new InvalidOperationException("GitHub API returned an empty user profile.");
+        return response.Data ?? throw new InvalidOperationException("GitHub API returned an empty user profile.");
     }
 
     public async Task<RepositoriesResultModel<GitHubRepositoryModel>> GetRepositoriesAsync(string url, string accessToken, CancellationToken cancellationToken)
     {
 
-        var response = await SendAsync(HttpMethod.Get, url, accessToken, cancellationToken);
-
-        var result = await response.Content.ReadFromJsonAsync<IEnumerable<GitHubRepositoryModel>>(cancellationToken)
-               ?? Enumerable.Empty<GitHubRepositoryModel>();
+        var response = await SendAsync<IEnumerable<GitHubRepositoryModel>>(HttpMethod.Get, url, accessToken, cancellationToken);
 
         return new RepositoriesResultModel<GitHubRepositoryModel>
         {
-            List = result,
-            LinkHeader = ExtractLinkHeader(response)
+            List = response.Data ?? Enumerable.Empty<GitHubRepositoryModel>(),
+            LinkHeader = response.LinkHeader
         };
     }
 
@@ -111,10 +130,9 @@ public class GitHubClient : IGitHubClient
             type = issueModel.Type
         };
 
-        var response = await SendAsync(HttpMethod.Post, url, accessToken, cancellationToken, payload);
+        var response = await SendAsync<GitHubIssueModel>(HttpMethod.Post, url, accessToken, cancellationToken, payload);
 
-        return await response.Content.ReadFromJsonAsync<GitHubIssueModel>(cancellationToken)
-               ?? throw new InvalidOperationException("GitHub API returned an empty issue response.");
+        return response.Data ?? throw new InvalidOperationException("GitHub API returned an empty issue response.");
     }
 
     public async Task<GitHubPullRequestModel> CreatePullRequestAsync(PullRequestModel pullRequestModel, string url, string accessToken, CancellationToken cancellationToken)
@@ -146,24 +164,20 @@ public class GitHubClient : IGitHubClient
             payload["head_repo"] = pullRequestModel.HeadRepo;
 
 
-        var response = await SendAsync(HttpMethod.Post, url, accessToken, cancellationToken, payload);
+        var response = await SendAsync<GitHubPullRequestModel>(HttpMethod.Post, url, accessToken, cancellationToken, payload);
 
-        return await response.Content.ReadFromJsonAsync<GitHubPullRequestModel>(cancellationToken)
-               ?? throw new InvalidOperationException("GitHub API returned an empty pull request response.");
+        return response.Data ?? throw new InvalidOperationException("GitHub API returned an empty pull request response.");
     }
 
     public async Task<RepositoriesResultModel<GitHubIssueModel>> GetRepositoryIssuesAsync(string url, string accessToken, CancellationToken cancellationToken)
     {
 
-        var response = await SendAsync(HttpMethod.Get, url, accessToken, cancellationToken);
-
-        var result = await response.Content.ReadFromJsonAsync<IEnumerable<GitHubIssueModel>>(cancellationToken)
-           ?? Enumerable.Empty<GitHubIssueModel>();
+        var response = await SendAsync<IEnumerable<GitHubIssueModel>>(HttpMethod.Get, url, accessToken, cancellationToken);
 
         return new RepositoriesResultModel<GitHubIssueModel>
         {
-            List = result,
-            LinkHeader = ExtractLinkHeader(response)
+            List = response.Data ?? Enumerable.Empty<GitHubIssueModel>(),
+            LinkHeader = response.LinkHeader
         };
 
     }
@@ -171,15 +185,12 @@ public class GitHubClient : IGitHubClient
     public async Task<RepositoriesResultModel<GitHubCommitModel>> GetCommitsAsync(string url, string accessToken, CancellationToken cancellationToken)
     {
 
-        var response = await SendAsync(HttpMethod.Get, url, accessToken, cancellationToken);
-
-        var result = await response.Content.ReadFromJsonAsync<IEnumerable<GitHubCommitModel>>(cancellationToken)
-           ?? Enumerable.Empty<GitHubCommitModel>();
+        var response = await SendAsync<IEnumerable<GitHubCommitModel>>(HttpMethod.Get, url, accessToken, cancellationToken);
 
         return new RepositoriesResultModel<GitHubCommitModel>
         {
-            List = result,
-            LinkHeader = ExtractLinkHeader(response)
+            List = response.Data ?? Enumerable.Empty<GitHubCommitModel>(),
+            LinkHeader = response.LinkHeader
         };
 
     }

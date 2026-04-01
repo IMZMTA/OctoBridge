@@ -1,6 +1,6 @@
 using MediatR;
 using OctoBridge.Domain.Enums;
-using OctoBridge.Application.Common;
+using OctoBridge.Domain.Common;
 
 namespace OctoBridge.Application.Features.Auth.Queries.HandleOAuthCallback;
 

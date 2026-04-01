@@ -1,5 +1,7 @@
 using FluentValidation;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Application.CQRS.Abstractions;
+using OctoBridge.Domain.Constants.App;
 using OctoBridge.Domain.Constants;
 
 namespace OctoBridge.Application.Features.PAT.Queries.ConnectGitHubByUsersPAT;
@@ -11,12 +13,12 @@ public class ConnectGitHubByUsersPATCommandValidator : BaseValidator<ConnectGitH
 
         RuleFor(x => x.PersonalAccessToken)
                 .NotEmpty()
-                .WithMessage(Messages.PATRequired)
+                .WithMessage(ValidationMessages.PATRequired)
                 .NotNull()
-                .MaximumLength(AppConstants.MaxTokenLength)
-                .WithMessage(string.Format(Messages.PATTooLong,AppConstants.MaxTokenLength))
+                .MaximumLength(AppLimits.MaxTokenLength)
+                .WithMessage(string.Format(ValidationMessages.TooLong, ErrorFields.PAT, AppLimits.MaxTokenLength))
                 .Must(token => token.StartsWith("ghp_") || token.StartsWith("github_pat_"))
-                .WithMessage(Messages.PATInvalidFormat);
+                .WithMessage(ValidationMessages.PATInvalidFormat);
 
     }
 }

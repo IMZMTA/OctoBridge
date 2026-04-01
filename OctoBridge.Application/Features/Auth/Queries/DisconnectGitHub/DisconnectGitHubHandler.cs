@@ -1,5 +1,5 @@
-using OctoBridge.Domain.Constants;
-using OctoBridge.Application.Common;
+using OctoBridge.Domain.Common;
+using OctoBridge.Domain.Constants.Messages;
 using OctoBridge.Application.CQRS.Abstractions;
 using OctoBridge.Infrastructure.Services.UserContext;
 using OctoBridge.Infrastructure.Services.UserService;
@@ -31,12 +31,12 @@ public class DisconnectGitHubHandler : BaseHandler<DisconnectGitHubRequestDto, D
         var providerId = userContext.ProviderId;
         var userName = userContext.UserName;
 
-        if (userId == AppConstants.Zero || providerId == AppConstants.Zero)
+        if (userId == 0 || providerId == 0)
         {
             return new ApiResponse<DisconnectGitHubResponseDto>
             {
                 Success = false,
-                Messages = new List<string> { Messages.UserOrSessionExpired }
+                Messages = new List<string> { ErrorMessages.UserOrSessionExpired }
             };
         }
 
@@ -47,7 +47,7 @@ public class DisconnectGitHubHandler : BaseHandler<DisconnectGitHubRequestDto, D
             return new ApiResponse<DisconnectGitHubResponseDto>
             {
                 Success = false,
-                Messages = new() { Messages.UserNotFound }
+                Messages = new() { ErrorMessages.UserNotFound }
             };
         }
 
@@ -60,7 +60,7 @@ public class DisconnectGitHubHandler : BaseHandler<DisconnectGitHubRequestDto, D
         return new ApiResponse<DisconnectGitHubResponseDto>()
         {
             Success = true,
-            Messages = new List<string> { Messages.DisconnectSuccess },
+            Messages = new List<string> { SuccessMessages.DisconnectSuccess },
             Data = new DisconnectGitHubResponseDto()
             {
                 UserId = removedUserId,

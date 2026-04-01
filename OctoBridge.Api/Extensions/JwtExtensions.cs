@@ -2,6 +2,7 @@ using System.Text;
 using OctoBridge.Domain.Config;
 using OctoBridge.Domain.Constants;
 using Microsoft.IdentityModel.Tokens;
+using OctoBridge.Domain.Constants.Messages;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace OctoBridge.Api.Extensions;
@@ -10,8 +11,8 @@ public static class JwtExtensions
 {
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration config)
     {
-        var jwtSettings = config.GetSection(AppConstants.AppSettings).Get<AppSettings>()?.Jwt
-                          ?? throw new InvalidOperationException(Messages.MissingAppSetting);
+        var jwtSettings = config.GetSection(ConfigurationKeys.AppSettings).Get<AppSettings>()?.Jwt
+                          ?? throw new InvalidOperationException(ErrorMessages.MissingAppSettings);
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -31,13 +32,13 @@ public static class JwtExtensions
                 {
                     OnMessageReceived = context =>
                     {
-                        var token = context.Request.Cookies[AppConstants.JWTTokenName];
+                        var token = context.Request.Cookies[SecurityConstants.JwtTokenName];
                         if (string.IsNullOrEmpty(token))
                         {
-                            var authHeader = context.Request.Headers[AppConstants.Authorization].FirstOrDefault();
-                            if (authHeader?.StartsWith($"{AppConstants.Bearer} ") == true)
+                            var authHeader = context.Request.Headers[SecurityConstants.AuthorizationHeader].FirstOrDefault();
+                            if (authHeader?.StartsWith($"{SecurityConstants.Bearer} ") == true)
                             {
-                                token = authHeader[$"{AppConstants.Bearer} ".Length..].Trim();
+                                token = authHeader[$"{SecurityConstants.Bearer} ".Length..].Trim();
                             }
                         }
                         context.Token = token;
@@ -46,7 +47,7 @@ public static class JwtExtensions
                 };
             });
 
-        services.AddAntiforgery(options => options.HeaderName = AppConstants.AntiforgeryHeader);
+        services.AddAntiforgery(options => options.HeaderName = SecurityConstants.AntiforgeryHeader);
 
         return services;
     }
